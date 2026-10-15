@@ -110,6 +110,7 @@ targets="\
 	Rockchip|RK3326|aarch64|image \
 	Rockchip|RK3328|aarch64|image \
 	Rockchip|RK3399|aarch64|image \
+	Rockchip|RK3588|aarch64|image \
 	Samsung|Exynos|arm|image \
 	"
 

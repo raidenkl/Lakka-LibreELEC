@@ -38,19 +38,42 @@ pkg_lock_status "GETPKG" "${PKG_NAME}" "unpack" "processing package repository..
 
 rm -rf "${STAMP_URL}" "${STAMP_SHA}" "${PACKAGE}" "${GIT_TARBALL}" "${GIT_STAMP_FILE}"
 
-mkdir -p "${PACKAGE}"
+# This build host sits behind a proxy that intermittently truncates TLS streams
+# ("RPC failed; curl 56 GnuTLS recv error (-9)" / "early EOF" / "index-pack failed"),
+# so every network git operation is retried from a clean checkout.
+# Override the number of attempts with GIT_RETRIES=<n>.
+GIT_RETRIES="${GIT_RETRIES:-5}"
+git_get_attempt=1
 
-git -C "${PACKAGE}" init
-git -C "${PACKAGE}" remote add origin ${PKG_URL}
+while :; do
+  rm -rf "${PACKAGE}"
+  mkdir -p "${PACKAGE}"
 
-build_msg "CLR_GET" "GIT FETCH" "${1}"
-git -C "${PACKAGE}" fetch --depth 1 origin ${PKG_VERSION}
-git -C "${PACKAGE}" checkout FETCH_HEAD
+  git -C "${PACKAGE}" init
+  git -C "${PACKAGE}" remote add origin ${PKG_URL}
 
-if [ "${PKG_GIT_SKIP_SUBMODULE}" != "yes" ]; then
-  build_msg "CLR_GET" "GIT SUBMODULE" "${1}"
-  git -C "${PACKAGE}" submodule update --init --recursive --depth 1
-fi
+  build_msg "CLR_GET" "GIT FETCH" "${1}"
+  if git -C "${PACKAGE}" fetch --depth 1 origin ${PKG_VERSION} && \
+     git -C "${PACKAGE}" checkout FETCH_HEAD; then
+    if [ "${PKG_GIT_SKIP_SUBMODULE}" = "yes" ]; then
+      break
+    fi
+
+    build_msg "CLR_GET" "GIT SUBMODULE" "${1}"
+    if git -C "${PACKAGE}" submodule update --init --recursive --depth 1; then
+      break
+    fi
+  fi
+
+  if [ "${git_get_attempt}" -ge "${GIT_RETRIES}" ]; then
+    echo "get_git: ${1} failed after ${GIT_RETRIES} attempts" >&2
+    exit 1
+  fi
+
+  echo "get_git: network failure (attempt ${git_get_attempt}/${GIT_RETRIES}), cleaning up and retrying in 15s..."
+  git_get_attempt=$((git_get_attempt + 1))
+  sleep 15
+done
 
 build_msg "CLR_GET" "GIT TARBALL" "${1}"
 echo "Creating tarball from the package repository..."

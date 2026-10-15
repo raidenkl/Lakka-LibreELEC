@@ -68,6 +68,7 @@ targets="\
 	Rockchip|RK3326|aarch64| \
 	Rockchip|RK3328|aarch64| \
 	Rockchip|RK3399|aarch64| \
+	Rockchip|RK3588|aarch64| \
 	Samsung|Exynos|arm| \
 "
 

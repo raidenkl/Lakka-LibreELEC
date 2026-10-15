@@ -16,6 +16,13 @@ fi
 
 if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
   PKG_DEPENDS_TARGET+=" ${OPENGLES}"
+  # 本平台没有桌面 GL（libmali 只提供 EGL/GLES）。核心 Makefile.common 默认走
+  # -D_OGL3_ + -lGL 的桌面路径，必须显式 FORCE_GLES=1 才会切到
+  # -D_HAVE_OPENGLES3 + -lGLESv2；否则 rglgen_headers.h 会去 include
+  # <GL/gl.h>（libmali 环境里不存在）而编译失败。
+  if [ "${OPENGL_SUPPORT}" != "yes" ]; then
+    PKG_MAKE_OPTS_TARGET+=" FORCE_GLES=1"
+  fi
 fi
 
 if [ "${VULKAN_SUPPORT}" = "yes" ]; then

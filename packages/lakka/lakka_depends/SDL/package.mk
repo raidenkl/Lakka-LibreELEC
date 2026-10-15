@@ -76,7 +76,14 @@ PKG_CONFIGURE_OPTS_TARGET="--enable-shared \
                            --disable-video-x11-xshape \
                            --disable-video-x11-vm --without-x"
 
-PKG_CONFIGURE_OPTS_HOST="${PKG_CONFIGURE_OPTS_TARGET}"
+# The host build must not be handed the target ABI paths.  The target options
+# carry --with-alsa-{inc-,}prefix=${SYSROOT_PREFIX}/... which point into the
+# aarch64 sysroot; SDL configure turns them into
+#   -I<toolchain>/aarch64-libreelec-linux-gnu/sysroot/usr/include
+# so the x86_64 host compiler would include aarch64 glibc headers and fail with
+#   bits/math-vector.h: error: unknown type name '__Float32x4_t'
+PKG_CONFIGURE_OPTS_HOST="$(echo ${PKG_CONFIGURE_OPTS_TARGET} \
+  | sed -e 's|--with-alsa-prefix=[^ ]*||g' -e 's|--with-alsa-inc-prefix=[^ ]*||g')"
 
 
 if [ "${OPENGL_SUPPORT}" = "yes" ]; then

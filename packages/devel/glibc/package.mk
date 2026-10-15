@@ -43,6 +43,10 @@ if [ "${PROJECT}" = "L4T" ]; then
   PKG_CONFIGURE_OPTS_TARGET+=" --disable-mathvec"
 elif [ "${PROJECT}" = "Ayn" ]; then
   PKG_CONFIGURE_OPTS_TARGET="${PKG_CONFIGURE_OPTS_TARGET//--enable-kernel=6.6.0/--enable-kernel=5.19.0/}"
+elif [ "${LINUX}" = "lubancat-6.1" ]; then
+  # LubanCat vendor 6.1 kernel: its headers (6.1.99) are older than the
+  # 6.6.0 default, so lower the minimum kernel version glibc targets.
+  PKG_CONFIGURE_OPTS_TARGET="${PKG_CONFIGURE_OPTS_TARGET//--enable-kernel=6.6.0/--enable-kernel=6.1.0/}"
 elif [ "${PROJECT}" = "RPi" ]; then
   if [ "${DEVICE}" = "RPi3-Composite" -o "${DEVICE}" = "RPi4-Composite" ]; then
     PKG_CONFIGURE_OPTS_TARGET="${PKG_CONFIGURE_OPTS_TARGET//--enable-kernel=6.6.0/--enable-kernel=5.10.0/}"

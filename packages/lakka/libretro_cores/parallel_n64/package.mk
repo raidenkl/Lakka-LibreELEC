@@ -17,13 +17,22 @@ fi
 
 if [ "${OPENGL_SUPPORT}" = "yes" ]; then
   PKG_DEPENDS_TARGET+=" ${OPENGL}"
+  PKG_MAKE_OPTS_TARGET+=" HAVE_OPENGL=1"
+elif [ "${OPENGLES_SUPPORT}" = "yes" ]; then
+  # 本核心的 Makefile.common 把 GLES 宏定义**嵌套**在 ifeq ($(HAVE_OPENGL),1) 之内，
+  # 所以「只有 GLES、没有桌面 GL」的平台也必须把 HAVE_OPENGL 置 1，否则一个 GL 宏
+  # 都不会定义，代码会落到 rglgen_private_headers.h 的 #else 分支去
+  # #include <GL/gl.h>（桌面 GL 头，libmali/mesa-GLES-only 环境里不存在）而失败。
+  PKG_MAKE_OPTS_TARGET+=" HAVE_OPENGL=1"
 else
   PKG_MAKE_OPTS_TARGET+=" HAVE_OPENGL=0"
 fi
 
 if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
   PKG_DEPENDS_TARGET+=" ${OPENGLES}"
-  PKG_MAKE_OPTS_TARGET+=" FORCE_GLES=1"
+  # GLES=1 既让 Makefile.common 定义 -DHAVE_OPENGLES2 并编入 glsym_es2.c，
+  # 也会让它自动关掉只支持桌面 GL 的 GLIDEN64。
+  PKG_MAKE_OPTS_TARGET+=" FORCE_GLES=1 GLES=1"
 fi
 
 # workaround for RPiZero2-GPiCase compile error

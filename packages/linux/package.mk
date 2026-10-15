@@ -66,6 +66,16 @@ case "${LINUX}" in
     PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     PKG_PATCH_DIRS="default"
     ;;
+  lubancat-6.1)
+    # Rockchip/LubanCat vendor BSP kernel for the RK3588 device
+    # (upstream branch: lbc-develop-6.1)
+    PKG_VERSION="1bc19c520831b6d0ca7d7afb4639189a2064e9bc"
+    PKG_SHA256="b5764ff9387540b75a53ca6d5f8ac8c2a0586eece044752afc02979378925eff"
+    PKG_SOURCE_NAME="${PKG_NAME}-${PKG_VERSION}.tar.xz"
+    PKG_URL="https://github.com/LubanCat/kernel/archive/${PKG_VERSION}.tar.gz"
+    # vendor specific patches live in projects/<project>/patches/linux/vendor/
+    PKG_PATCH_DIRS="vendor"
+    ;;
   *)
     PKG_VERSION="6.18.19"
     PKG_SHA256="eaaf78271cd07c68ad9c4c9a70c72718b33abbd716239d82bac96b1751eb090c"

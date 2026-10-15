@@ -30,17 +30,25 @@ if [ -e /storage/.please_resize_me ] ; then
     reboot -f
   fi
 
-  # get the disk. /storage on 2nd partition
+  # get the disk and the partition number /storage lives on.
+  #
+  # NOTE: /storage is not necessarily partition 2.  The Rockchip update.img
+  # layout (device/rockchip/rk3588/package-file-extboot) defines uboot, boot and
+  # rootfs as partitions 1, 2 and 3, so /storage ends up on /dev/mmcblk0p3.
+  # Derive the number from the mounted device instead of hard-coding it, else
+  # PART is empty, DISK is empty and the resize is silently aborted.
   echo $(grep "/storage " /proc/mounts) >>$LOG
-  PART=$(grep "/storage " /proc/mounts | cut -d" " -f1 | grep '2$')
+  PART=$(grep "/storage " /proc/mounts | cut -d" " -f1)
+  PARTNUM=$(echo "${PART}" | sed 's/.*[^0-9]\([0-9][0-9]*\)$/\1/')
+  [ "${PARTNUM}" = "${PART}" ] && PARTNUM=""
 
-  # get disk: /dev/sdx2 -> /dev/sdx, /dev/mmcblkxp2 -> /dev/mmcblkx
+  # get disk: /dev/sda2 -> /dev/sda, /dev/mmcblk0p3 -> /dev/mmcblk0, /dev/nvme0n1p2 -> /dev/nvme0n1
   case $PART in
-    "/dev/mmcblk"*|"/dev/nvme"*)
-      DISK=$(echo $PART | sed s/p2$//g)
+    "/dev/mmcblk"*|"/dev/nvme"*|"/dev/loop"*)
+      DISK=$(echo $PART | sed "s/p${PARTNUM}$//g")
       ;;
     *)
-      DISK=$(echo $PART | sed s/2$//g)
+      DISK=$(echo $PART | sed "s/${PARTNUM}$//g")
       ;;
   esac
 
@@ -53,7 +61,7 @@ if [ -e /storage/.please_resize_me ] ; then
   echo "DISK: $DISK  PART: $PART  LABEL: $LABEL  UUID: $UUID" >>$LOG
 
   # just in case
-  if [ ! -z "$DISK" -a ! -z "$PART" -a ! -z "$UUID" ] ; then
+  if [ ! -z "$DISK" -a ! -z "$PART" -a ! -z "$PARTNUM" -a ! -z "$UUID" ] ; then
     umount $PART
 
     echo "PARTITION RESIZING IN PROGRESS"
@@ -61,7 +69,7 @@ if [ -e /storage/.please_resize_me ] ; then
     echo "Please do not reboot or turn off your @DISTRONAME@ device!"
     echo ""
 
-    StartProgressLog spinner "Resizing partition...   " "parted -s -f -m $DISK resizepart 2 100% >>$LOG 2>&1"
+    StartProgressLog spinner "Resizing partition...   " "parted -s -f -m $DISK resizepart ${PARTNUM} 100% >>$LOG 2>&1"
     StartProgressLog spinner "Creating file system... " "mke2fs -F -q -t ext4 -m 0 -L \"$LABEL\" -U \"$UUID\" $PART >>$LOG 2>&1"
     StartProgressLog spinner "Checking file system... " "e2fsck -f -p $PART >>$LOG 2>&1"
     if [ -f /flash/firstboot.sh ]; then

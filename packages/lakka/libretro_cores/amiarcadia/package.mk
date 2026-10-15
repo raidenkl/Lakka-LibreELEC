@@ -1,7 +1,10 @@
 PKG_NAME="amiarcadia"
 PKG_VERSION="34af1c9eb71c7ef58e7719e67d77881a99874c36"
 PKG_LICENSE="Non-commercial"
-PKG_SITE="https://git.libretro.com/libretro/amiarcadia"
+# git.libretro.com is unreachable in some regions (TCP 80/443/9418 all time out),
+# so fetch from the GitHub mirror, which carries the identical pinned commit
+# (same SHA = byte-identical tree); see commit 34af1c9eb71c7ef58e7719e67d77881a99874c36.
+PKG_SITE="https://github.com/warmenhoven/amiarcadia"
 PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="A libretro core for emulating Signetics 2650 CPU-based systems, based on DroidArcadia by James Jacobs."

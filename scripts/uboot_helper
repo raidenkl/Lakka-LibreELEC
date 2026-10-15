@@ -414,6 +414,33 @@ devices = \
         'rockchip_legacy_boot': '1'
       },
     },
+    'RK3588': {
+      'lubancat-5': {
+        'dtb': 'rk3588-lubancat-5.dtb',
+        'config': 'lubancat-5-rk3588-pcie_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-5io': {
+        'dtb': 'rk3588-lubancat-5io.dtb',
+        'config': 'lubancat-5io-rk3588-pcie_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-5-v2': {
+        'dtb': 'rk3588-lubancat-5-v2.dtb',
+        'config': 'lubancat-5-rk3588-pcie_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-4': {
+        'dtb': 'rk3588s-lubancat-4.dtb',
+        'config': 'lubancat-4-rk3588s-msata_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-4-v1': {
+        'dtb': 'rk3588s-lubancat-4-v1.dtb',
+        'config': 'lubancat-4-rk3588s-msata_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+    },
   },
   'Samsung': {
     'Exynos': {
