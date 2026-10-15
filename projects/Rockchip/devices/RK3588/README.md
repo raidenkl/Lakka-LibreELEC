@@ -9,6 +9,37 @@ vendor 启动链与 vendor 内核：
 * 内核：[LubanCat/kernel](https://github.com/LubanCat/kernel) 分支 `lbc-develop-6.1`
 * GPU：Rockchip `libmali` 闭源 blob（Mali-G610 / Valhall）—— vendor 内核里没有 panfrost
 
+## 国内网络构建
+
+所有被钉住的源码都在构建时从 GitHub 拉取（`LubanCat/{u-boot,kernel,rkbin}`、
+`tsukumijima/libmali-rockchip` 以及绝大多数 libretro 核心），另有少量包来自
+`ftp.gnu.org`、`www.kernel.org` 等。网络通畅时**什么都不用做**；如果 GitHub
+访问不稳定，运行一次：
+
+```sh
+./projects/Rockchip/tools/setup-cn-network.sh
+```
+
+它会做两件**用户级**配置（不改动仓库、可用 `-u` 一键撤销）：
+
+1. `git config --global url.<mirror>/https://github.com/.insteadOf https://github.com/`
+   —— 让 `scripts/get_git` 的 git 源走镜像；
+2. 安装 `~/.local/bin/wget` 包装器 —— 让 `scripts/get_archive` 的归档下载在
+   GitHub 失败时自动经镜像重试，并对其他主机的 TLS 故障做 https→http 回退
+   （如 `www.kernel.org`）。**完整性不受影响**：每个包下载后仍按 `PKG_SHA256`
+   校验，镜像只能让下载失败，不可能悄悄替换文件。
+
+默认镜像 `gh-proxy.com`（备用 `ghfast.top`），可用 `-m` 换：
+`./setup-cn-network.sh -m https://ghfast.top`。已有代理的用户无需此脚本，
+直接 `export http_proxy=... https_proxy=...` 即可。
+
+手动执行等价的两条命令也可以：
+
+```sh
+git config --global url."https://gh-proxy.com/https://github.com/".insteadOf "https://github.com/"
+# 归档下载的镜像包装器见 projects/Rockchip/tools/setup-cn-network.sh 内嵌实现
+```
+
 ## 快速开始（三步）
 
 ```sh
