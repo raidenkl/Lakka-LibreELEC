@@ -1,0 +1,25 @@
+Subject: [PATCH] RK3588: LubanCat 5IO: enable the HDMI0 / VP0 display route
+
+rk3588-lubancat-5iob.dts (the real board level dts behind the 212 byte
+rk3588-lubancat-5io.dts) ships with every display route include commented
+out, so &hdmi0, &hdmi0_in_vp0 and &route_hdmi0 were never set to okay.
+Without a connected output the vop2 driver registers no CRTC at all and DRM
+fails to bind ("[drm:vop2_bind] *ERROR* No crtc register, please check dts
+config"), which leaves the board with no /dev/dri/card0 and therefore no
+HDMI signal on either of the two HDMI outputs.
+
+Include rk3588-lubancat-5io-hdmi0-vp0.dtsi, the vendor provided set for this
+board: HDMI0 controller + hdmi0-sound/i2s5 + hdmi0_in_vp0 + route_hdmi0
+(connect = vp0_out_hdmi0) + hdptxphy_hdmi0.
+
+--- a/arch/arm64/boot/dts/rockchip/rk3588-lubancat-5iob.dts	2026-10-15 01:01:23.297819046 +0000
++++ b/arch/arm64/boot/dts/rockchip/rk3588-lubancat-5iob.dts	2026-10-15 01:01:23.301819200 +0000
+@@ -20,7 +20,7 @@
+ #include "rk3588-linux.dtsi"
+ 
+ //vp0
+-// #include "rk3588-lubancat-5io-hdmi0-vp0.dtsi"
++#include "rk3588-lubancat-5io-hdmi0-vp0.dtsi"
+ // #include "rk3588-lubancat-5io-hdmi1-vp0.dtsi"
+ 
+ //vp1

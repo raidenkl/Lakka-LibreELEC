@@ -1,0 +1,32 @@
+[Unit]
+Description=Serial console on /dev/ttyFIQ0 (Rockchip FIQ debugger, UART2)
+After=systemd-user-sessions.service
+IgnoreOnIsolate=yes
+#
+# No After=/BindsTo=dev-ttyFIQ0.device on purpose.  The fiq_debugger driver
+# registers the tty itself and udev never tags it, so that device unit never
+# becomes active and anything ordered after it waits forever - observed on the
+# board: "systemd[1]: Expecting device dev-ttyFIQ0.device..."
+
+[Service]
+# No agetty involved: this is the same "shell straight on a tty" mechanism
+# systemd uses for its own early-boot debug-shell.service.  See the package.mk
+# for why agetty is not available here.
+ExecStart=-/bin/sh -l
+Environment=TERM=linux
+# /dev/ttyFIQ0 is the kernel console, so the tty has to be forced.
+StandardInput=tty-force
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/ttyFIQ0
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=no
+KillMode=process
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

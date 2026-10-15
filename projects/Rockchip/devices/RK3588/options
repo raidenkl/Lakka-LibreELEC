@@ -1,0 +1,63 @@
+################################################################################
+# setup device defaults
+#   Rockchip RK3588  --  LubanCat 5 (野火鲁班猫5)
+#     SoC     : 4x Cortex-A76 + 4x Cortex-A53, Mali-G610 (Valhall) GPU
+#     boot    : eMMC, Rockchip FIT boot chain (SPL loader + uboot.img)
+#     kernel  : LubanCat vendor BSP 6.1 (LubanCat/kernel, branch lbc-develop-6.1)
+#     graphics: Rockchip libmali blob (Valhall G610), no Mesa/panfrost
+################################################################################
+
+  # The TARGET_CPU variable controls which processor should be targeted for
+  # generated code.
+    case $TARGET_ARCH in
+      aarch64)
+        TARGET_CPU="cortex-a76.cortex-a55"
+        TARGET_CPU_FLAGS="+crc+crypto"
+        ;;
+      arm)
+        TARGET_KERNEL_ARCH="arm64"
+        TARGET_FLOAT="hard"
+        TARGET_CPU="cortex-a76.cortex-a55"
+        TARGET_CPU_FLAGS="+crc"
+        TARGET_FPU="crypto-neon-fp-armv8"
+        ;;
+    esac
+
+  # Kernel to use (LubanCat vendor BSP kernel)
+    LINUX="lubancat-6.1"
+
+  # Kernel target
+    KERNEL_TARGET="Image"
+
+  # Rockchip vendor boot chain: SPL loader + FIT (uboot.img with BL31 from rkbin)
+    ROCKCHIP_LEGACY_BOOT="1"
+
+  # Graphic drivers to use (Mali-G610 through the Rockchip libmali userspace blob)
+    MALI_FAMILY="g610"
+    GRAPHIC_DRIVERS="mali"
+    OPENGLES="libmali"
+
+  # kernel serial console (Rockchip FIQ debugger on UART2 -> ttyFIQ0)
+  # 内核把「最后一个 console=」当作 /dev/console（交互控制台 + initramfs shell）。
+  # 之前写成 "console=ttyFIQ0 console=tty1" → 交互控制台落在 HDMI(tty1) 上，串口收不到
+  # 任何输入；串口要能登录必须让它排在最后。两个 console 都仍会收到内核 printk。
+    EXTRA_CMDLINE="console=tty1 console=ttyFIQ0 coherent_pool=2M cma=64M"
+
+  # set the addon project
+    ADDON_PROJECT="ARMv8"
+
+  # additional packages
+    ADDITIONAL_PACKAGES+=" pciutils"
+
+  # 串口调试 shell：vendor 内核把 UART2 交给 fiq_debugger（/dev/ttyFIQ0），而
+  # LibreELEC 有意删掉了所有 getty 单元、镜像里也没有 agetty，所以自带一个
+  # "直接在 tty 上起 root shell" 的单元（见 packages/rk-serial-console）。
+    ADDITIONAL_PACKAGES+=" rk-serial-console"
+
+  # 只保留主流现代机种。排除：1970–80 年代老机种、冷门老电脑（PC-88/98、X1/X68000、
+  # Thomson、Enterprise、P2000）、小众幻想主机与玩具、非模拟器类核心；另排除 3 个
+  # Rust 核心（rustation_ng / boytacean / doukutsu_rs），它们会拉入
+  # llvm:host -> rust:host -> cargo:host，而 130 MB 的 LLVM 源码在本网络下无法下载；
+  # 三者都有更好的替代（PS1：beetle_psx/pcsx_rearmed/swanstation；GB：gambatte/sameboy）。
+  # 完整核心对照表见同目录 CORES.md，改完请按 BUILD_GUIDE §11.4 校验清单。
+    EXCLUDE_LIBRETRO_CORES="stella stella2014 a5200 prosystem virtualjaguar handy beetle_lynx gearlynx atari800 freeintv freechaf o2em vecx amiarcadia pd777 gearcoleco jollycv fuse_libretro 81 cap32 crocods bluemsx fmsx b2 applewin m2000 theodore ep128emu xmil quasi88 np2kai meowpc98 px68k gam4980 potator gw_libretro tamalibretro sameduck mu ardens beetle_vb pokemini tic80 wasm4 vircon32 lowres_nx uzem retro8 fake_08 jaxe pocketcdg gme numero 2048 dinothawr mrboom jumpnbump superbroswar thepowdertoy craft anarch lutro chailove pzretro mojozork xrick dirksimple dice cannonball clownmdemu emux_sms lrps2 play boom3 tyrquake vitaquake2 vitaquake3 ecwolf openlara rustation_ng boytacean doukutsu_rs azahar dolphin"

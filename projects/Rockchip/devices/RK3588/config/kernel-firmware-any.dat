@@ -1,0 +1,14 @@
+rockchip/*
+ath10k/QCA6174
+ath10k/QCA9377
+ath10k/QCA9887
+ath10k/QCA9888
+ath10k/QCA988X
+ath10k/QCA9984
+ath10k/QCA99X0
+brcm/brcmfmac*
+rtlwifi/rtl8821a*
+rtlwifi/rtl8822b*
+mwlwifi/
+# NOTE: mali_csffw.bin (Mali-G610 CSF firmware) is not shipped by linux-firmware,
+# it is installed by the libmali package into /lib/firmware/.
