@@ -43,7 +43,7 @@ git config --global url."https://gh-proxy.com/https://github.com/".insteadOf "ht
 ## 快速开始（三步）
 
 ```sh
-git clone -b rk3588-port https://github.com/raidenkl/Lakka-LibreELEC.git
+git clone -b lubancat https://github.com/raidenkl/Lakka-LibreELEC.git
 cd Lakka-LibreELEC
 cd projects/Rockchip/devices/RK3588/tools
 
@@ -187,10 +187,10 @@ projects/Rockchip/tools/build-board.sh --list               # 列出所有 (芯�
 
 | 板卡 | 型号 | 内核 dtb | u-boot defconfig | DDR blob | 状态 |
 | --- | --- | --- | --- | --- | --- |
-| `lubancat-5` | 鲁班猫5（RK3588） | `rk3588-lubancat-5.dtb` | `lubancat-5-rk3588-pcie_defconfig` | lp4 2112MHz | 已上机验证 |
-| `lubancat-5-v2` | 鲁班猫5 V2（RK3588） | `rk3588-lubancat-5-v2.dtb` | 复用 `lubancat-5-rk3588-pcie_defconfig`（厂商无 5-V2 专用 defconfig） | lp4 2112MHz | 静态校验通过，待上机 |
-| `lubancat-5io` | 鲁班猫5IO / 5IOB（RK3588） | `rk3588-lubancat-5io.dtb` | `lubancat-5io-rk3588-pcie_defconfig` | lp4 2112MHz | 静态校验通过，待上机 |
-| `lubancat-4` | 鲁班猫4（**RK3588S**） | `rk3588s-lubancat-4.dtb` | `lubancat-4-rk3588s-msata_defconfig` | lp4 1848MHz（厂商默认；可用 `DDR_FREQ=2112` 覆盖） | **已上机验证** |
+| `lubancat-5` | 鲁班猫5（RK3588） | `rk3588-lubancat-5.dtb` | `lubancat-5-rk3588-pcie_defconfig` | lp4 1848MHz | 已上机验证 |
+| `lubancat-5-v2` | 鲁班猫5 V2（RK3588） | `rk3588-lubancat-5-v2.dtb` | 复用 `lubancat-5-rk3588-pcie_defconfig`（厂商无 5-V2 专用 defconfig） | lp4 1848MHz | 静态校验通过，待上机 |
+| `lubancat-5io` | 鲁班猫5IO / 5IOB（RK3588） | `rk3588-lubancat-5io.dtb` | `lubancat-5io-rk3588-pcie_defconfig` | lp4 1848MHz | 静态校验通过，待上机 |
+| `lubancat-4` | 鲁班猫4（**RK3588S**） | `rk3588s-lubancat-4.dtb` | `lubancat-4-rk3588s-msata_defconfig` | lp4 1848MHz（可用 `DDR_FREQ=2112` 覆盖） | **已上机验证** |
 | `lubancat-4-v1` | 鲁班猫4 硬件版本 V1（RK3588S） | `rk3588s-lubancat-4-v1.dtb` | 复用 `lubancat-4-rk3588s-msata_defconfig` | 同上 | 与 v0 只差 DSI 复位/触摸中断引脚（见 BUILD_GUIDE §4.5），不用 MIPI 屏可通用 |
 
 显示通路：四块板都打开 VP0 → HDMI0（`patches/linux/vendor/rockchip-9000/9001/9002-*-enable-hdmi0-vp0.patch`）。
@@ -403,7 +403,7 @@ vendor 内核自带 `CONFIG_WERROR=y`，它会把每一个 GCC 警告都变成�
 
 | `patches/linux/vendor/rockchip-9001-rk3588-lubancat-5iob-enable-hdmi0-vp0.patch` | 打开 5IO（`rk3588-lubancat-5iob.dts`，`rk3588-lubancat-5io.dts` 只是它的壳）的 HDMI0/VP0 显示路由 | 与 9000 同因：厂商板级 dts 注释掉了全部显示 include，vop2 注册 0 个 CRTC → HDMI 无信号 |
 | `patches/linux/vendor/rockchip-9002-rk3588s-lubancat-4-enable-hdmi0-vp0.patch` | 打开鲁班猫4（RK3588S，`rk3588s-lubancat-4.dts`）的 HDMI0/VP0 显示路由 | 同上 |
-| `packages/u-boot/package.mk` | DDR blob 按 `UBOOT_SYSTEM` 选择（5 系 2112MHz，鲁班猫4 先用厂商默认 1848MHz，`DDR_FREQ` 可覆盖）；设备 fragment 合并改为幂等（`…_defconfig.lakka-pristine` 副本） | 多板共用同一棵 u-boot 源码树与同一份 defconfig，单向 sed / 盲目 append 都会串板或重复 |
+| `packages/u-boot/package.mk` | DDR blob 全系统一 1848MHz（不再按板区分，`DDR_FREQ` 可覆盖）；设备 fragment 合并改为幂等（`…_defconfig.lakka-pristine` 副本） | 多板共用同一棵 u-boot 源码树与同一份 defconfig，单向 sed / 盲目 append 都会串板或重复 |
 | `projects/Rockchip/tools/build-board.sh` | **新增**：按芯片 + 板卡构建镜像（菜单/参数），板卡清单从 `scripts/uboot_helper` 现取，含产物断言 | 多板卡后手工记 `UBOOT_SYSTEM`/清 u-boot 树/查产物极易出错 |
 
 > 注：`rk-serial-console` 提供的是**免密 root** 串口 shell（物理接触 UART 即等于 root），定位阶段方便，正式发布前可按需移除。

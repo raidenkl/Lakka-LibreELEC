@@ -1,7 +1,7 @@
 # Lakka RK3588（野火鲁班猫 5）编译操作手册
 
 > 目标机：`dev@10.255.200.141`，源码 `/home/dev/Lakka-LibreELEC`  
-> 当前分支：`rk3588-port`（基于 `Lakka-v6.1`，改动已全部应用）  
+> 当前分支：`lubancat`（基于 `Lakka-v6.1`，改动已全部应用）  
 > 野火 SDK（只读参考、素材来源）：`/home/dev/LubanCat_SDK`  
 > 本文所有路径/变量/版本号均来自实际验证，可直接照做。
 
@@ -141,11 +141,11 @@ zstdcat --version                      # 验证
 ```bash
 cd /home/dev/Lakka-LibreELEC
 git status                    # 确认干净
-git branch --show-current     # 应为 rk3588-port
+git branch --show-current     # 应为 lubancat
 git log --oneline -1
 ```
 
-若不在该分支：`git switch rk3588-port`（回到原状态：`git switch Lakka-v6.1`）。
+若不在该分支：`git switch lubancat`（回到原状态：`git switch Lakka-v6.1`）。
 
 ### 3.2 源码缓存（**关键**，本机网络特殊）
 
@@ -301,17 +301,16 @@ projects/Rockchip/tools/build-board.sh --list               # 列出所有 (芯�
    （dtb `rk3588s-lubancat-4-v1.dtb`，defconfig 复用 lubancat-4 的），直接
    `projects/Rockchip/tools/build-board.sh RK3588 lubancat-4-v1` 出专用镜像。
 
-#### DDR blob（按板选择）
+#### DDR blob（全系统一 1848MHz）
 
-`packages/u-boot/package.mk` 按 `UBOOT_SYSTEM` 选 rkbin `RK3588MINIALL.ini`
-里的 DDR blob：
+`packages/u-boot/package.mk` 把 rkbin `RK3588MINIALL.ini` 里的 DDR blob 统一改成
+1848MHz（= rkbin / LubanCat SDK 的默认值），不再按板区分：
 
-| 板卡 | DDR blob | 依据 |
-| --- | --- | --- |
-| lubancat-5 / 5-v2 / 5io | `rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.18.bin` | 5 号板上机实测（串口打印 `LPDDR4, 2112MHz`） |
-| lubancat-4 | `rk3588_ddr_lp4_1848MHz_lp5_2400MHz_v1.18.bin`（厂商默认） | RK3588S + LPDDR4X，**待上机确认** |
+| 板卡 | DDR blob |
+| --- | --- |
+| lubancat-5 / 5-v2 / 5io / 4 / 4-v1 | `rk3588_ddr_lp4_1848MHz_lp5_2400MHz_v1.18.bin` |
 
-实验时不用改代码：`DDR_FREQ=2112 projects/Rockchip/tools/build-board.sh RK3588 lubancat-4`。
+实验时不用改代码：`DDR_FREQ=2112 projects/Rockchip/tools/build-board.sh RK3588 lubancat-5`。
 
 #### 每块新板的上机检查清单（串口 1500000 8N1）
 

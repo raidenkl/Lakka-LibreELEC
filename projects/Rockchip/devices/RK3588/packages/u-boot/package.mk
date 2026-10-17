@@ -63,25 +63,16 @@ make_target() {
     cat "${dev_fragment}" >> "configs/${uboot_cfg}_defconfig"
   fi
 
-  # DDR blob selection (RK3588 family only - other chips have their own ini
-  # entries and are left on the vendor default).
-  #   * rkbin ships 1848MHz as the RK3588 default.
-  #   * The LubanCat 5 family is validated at 2112MHz (the board prints
-  #     "LPDDR4, 2112MHz" during boot and runs with that blob).
-  #   * LubanCat 4 is RK3588S with LPDDR4X, so it starts on the vendor default
-  #     until it has been verified on hardware.
-  # Override for experiments:  DDR_FREQ=2112 projects/Rockchip/tools/build-board.sh RK3588 lubancat-4
+  # DDR blob selection: rkbin ships one blob per frequency and 1848MHz is the
+  # default for the whole RK3588 family (LubanCat 5 trains 2112MHz as well, but
+  # 1848MHz is the value the vendor SDK ships and is used everywhere).
+  # Override for experiments:  DDR_FREQ=2112 projects/Rockchip/tools/build-board.sh RK3588 lubancat-5
   local ddr_freq="${DDR_FREQ:-}"
-  if [ -z "${ddr_freq}" ]; then
-    case "${UBOOT_SYSTEM}" in
-      lubancat-4*) ddr_freq=1848 ;;   # TODO(hw): verify on LubanCat 4 (RK3588S)
-      *)           ddr_freq=2112 ;;
-    esac
-  fi
+  [ -n "${ddr_freq}" ] || ddr_freq="1848"
   local uboot_ini="${rkbin}/RKBOOT/${DEVICE}MINIALL.ini"
-  if [ "${DEVICE}" = "RK3588" -a -f "${uboot_ini}" ]; then
+  if [ -f "${uboot_ini}" ]; then
     sed -i "s#rk3588_ddr_lp4_[0-9]*MHz_lp5_2400MHz_v1.18.bin#rk3588_ddr_lp4_${ddr_freq}MHz_lp5_2400MHz_v1.18.bin#g" "${uboot_ini}"
-    echo "u-boot: ${UBOOT_SYSTEM} DDR blob -> $(grep -m1 '^Path1=' ${uboot_ini})"
+    echo "u-boot: ${UBOOT_SYSTEM} DDR blob -> $(grep -m1 '^Path1=' "${uboot_ini}")"
   fi
 
   echo "u-boot: ./make.sh ${uboot_cfg} ${DEVICE}MINIALL.ini ${DEVICE}TRUST.ini"
