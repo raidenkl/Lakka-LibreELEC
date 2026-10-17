@@ -12,8 +12,8 @@
 
 PKG_NAME="libmali"
 PKG_VERSION="1.9-1"
-PKG_SHA256="9b68e764ce31dd88742157088597f7e6a38edb92299a29db24b7e9192c16776f"
-PKG_SOURCE_NAME="${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_SHA256="1432646b23750cedea0f19a276e6d19d6e620805bf5564b41efa575468cab0c4"
+PKG_SOURCE_NAME="libmali-valhall-g610-g24p0-gbm_1.9-1_arm64.deb"
 PKG_URL="https://github.com/tsukumijima/libmali-rockchip/releases/download/v1.9-1-20260923-ec78b74/libmali-valhall-g610-g24p0-gbm_1.9-1_arm64.deb"
 PKG_SITE="https://github.com/tsukumijima/libmali-rockchip"
 PKG_LICENSE="nonfree"
@@ -27,19 +27,29 @@ PKG_STAMP="${MALI_FAMILY}"
 MALI_VERSIONED="libEGL.so.1 libGLESv1_CM.so.1 libGLESv2.so.2 libgbm.so.1 libMaliOpenCL.so.1 libMaliVulkan.so.1"
 MALI_PLAIN="libEGL.so libGLESv1_CM.so libGLESv2.so libgbm.so libMaliOpenCL.so libMaliVulkan.so"
 
+# LibreELEC cannot unpack .deb natively (scripts/extract has no deb branch),
+# so unpack the ar archive here.  Resulting layout:
+#   usr/lib/aarch64-linux-gnu/{libmali.so.1.9.0, libmali-hook.so.1.9.0,
+#                              mali/<shims>, pkgconfig/mali.pc}
+#   lib/firmware/mali_csffw.bin
+unpack() {
+  command -v dpkg-deb >/dev/null || die "dpkg-deb is required to unpack the libmali .deb"
+  dpkg-deb -x "${SOURCES}/${PKG_NAME}/${PKG_SOURCE_NAME}" "${PKG_BUILD}"
+}
+
 install_mali() {
   local dest="$1"
 
   mkdir -p "${dest}/usr/lib"
-    cp -av  ${PKG_BUILD}/lib/aarch64-linux-gnu/libmali.so.1.9.0       "${dest}/usr/lib/"
-    cp -av  ${PKG_BUILD}/lib/aarch64-linux-gnu/libmali-hook.so.1.9.0  "${dest}/usr/lib/"
+    cp -av  ${PKG_BUILD}/usr/lib/aarch64-linux-gnu/libmali.so.1.9.0       "${dest}/usr/lib/"
+    cp -av  ${PKG_BUILD}/usr/lib/aarch64-linux-gnu/libmali-hook.so.1.9.0  "${dest}/usr/lib/"
 
     ln -sfv /usr/lib/libmali.so.1.9.0      "${dest}/usr/lib/libmali.so.1"
     ln -sfv /usr/lib/libmali.so.1.9.0      "${dest}/usr/lib/libmali.so"
     ln -sfv /usr/lib/libmali-hook.so.1.9.0 "${dest}/usr/lib/libmali-hook.so.1"
 
     for lib in ${MALI_VERSIONED} ${MALI_PLAIN}; do
-      cp -av ${PKG_BUILD}/lib/aarch64-linux-gnu/mali/${lib} "${dest}/usr/lib/${lib}"
+      cp -av ${PKG_BUILD}/usr/lib/aarch64-linux-gnu/mali/${lib} "${dest}/usr/lib/${lib}"
     done
 }
 
@@ -62,7 +72,7 @@ makeinstall_target() {
       ln -sfv libmali.so.1.9.0 "${SYSROOT_PREFIX}/usr/lib/${lib}.so"
     done
   mkdir -p ${SYSROOT_PREFIX}/usr/include
-    cp -a ${PKG_BUILD}/include/. ${SYSROOT_PREFIX}/usr/include/
+    cp -a ${PKG_DIR}/include/. ${SYSROOT_PREFIX}/usr/include/
     # Mesa normally installs <gbm.h>; this device replaces Mesa with the libmali blob,
     # so RetroArch (gfx/drivers_context/drm_ctx.c) fails with "gbm.h: No such file or
     # directory".  The header is taken verbatim from libgbm-dev 26.0.3 (MIT, same
@@ -70,7 +80,7 @@ makeinstall_target() {
     # and versioned with the port.
     cp -av ${PKG_DIR}/gbm.h ${SYSROOT_PREFIX}/usr/include/gbm.h
   mkdir -p ${SYSROOT_PREFIX}/usr/lib/pkgconfig
-    cp -av ${PKG_BUILD}/lib/aarch64-linux-gnu/pkgconfig/mali.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig/ 2>/dev/null || true
+    cp -av ${PKG_BUILD}/usr/lib/aarch64-linux-gnu/pkgconfig/mali.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig/ 2>/dev/null || true
 
     # Mesa normally ships egl.pc / gbm.pc / glesv2.pc, but this device replaces Mesa with
     # the libmali blob, so nothing provides them.  Consumers probe them via pkg-config:
@@ -129,6 +139,6 @@ PCEOF
   # GPU firmware, loaded by the vendor kbase driver from /lib/firmware
   # (scripts/image links /lib -> /usr/lib inside the image)
   mkdir -p ${INSTALL}/$(get_full_firmware_dir)/g610
-    cp -av ${PKG_BUILD}/firmware/mali_csffw.bin ${INSTALL}/$(get_full_firmware_dir)/mali_csffw.bin
-    cp -av ${PKG_BUILD}/firmware/mali_csffw.bin ${INSTALL}/$(get_full_firmware_dir)/g610/mali_csffw.bin
+    cp -av ${PKG_BUILD}/lib/firmware/mali_csffw.bin ${INSTALL}/$(get_full_firmware_dir)/mali_csffw.bin
+    cp -av ${PKG_BUILD}/lib/firmware/mali_csffw.bin ${INSTALL}/$(get_full_firmware_dir)/g610/mali_csffw.bin
 }
