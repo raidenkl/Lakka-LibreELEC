@@ -95,9 +95,18 @@ for a in "${args[@]}"; do
 done
 
 attempt() { # $1 = url, $2 = "" | "nocont"
-  local u="$1" a=()
+  local u="$1" a=() i
   if [ "$2" = "nocont" ]; then a=("${args_nocont[@]}"); else a=("${args[@]}"); fi
-  a[$idx]="$u"
+  # Replace the URL by CONTENT, never by index: args_nocont is shorter than
+  # args (it drops -c/--tries=), so a[$idx] would patch the wrong slot and
+  # leave the original URL in place - wget then receives TWO URLs and happily
+  # concatenates both downloads into the single -O file (observed: exactly 2x
+  # the real size, e.g. the G52 libmali deb at 29021920 bytes).
+  for i in "${!a[@]}"; do
+    case "${a[$i]}" in
+      http://*|https://*) a[$i]="$u" ;;
+    esac
+  done
   "$REAL_WGET" "${a[@]}"
 }
 
