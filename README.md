@@ -13,13 +13,14 @@ Lakka is a lightweight Linux distribution that transforms a small computer into 
 
 Please refer to our website https://www.lakka.tv/get on how to setup Lakka.
 
-## Rockchip / 野火鲁班猫支持（`rk3588-port` 分支）
+## Rockchip / 野火鲁班猫支持（`lubancat` 分支）
 
 本分支为野火（Embedfire）鲁班猫系列板卡提供 Lakka 支持，基于厂商 BSP 构建（vendor 6.1 内核 + vendor u-boot 2017.09 FIT 引导链 + rkbin）。所有源码都是构建时按钉住的 commit 自动从 GitHub 拉取，无需手动下载任何东西。
 
-* **支持板卡**：鲁班猫 4 / 4-V1 / 5 / 5-V2 / 5IO（RK3588 / RK3588S）
-* **验证状态**：鲁班猫 5 与鲁班猫 4 已上机验证（HDMI 出图、调试串口 root shell、首次开机自动扩容）；5-V2 / 5IO 已通过构建期产物校验，待上机测试
+* **支持板卡**：鲁班猫 3 / 3IO（RK3576）、鲁班猫 4 / 4-V1 / 5 / 5-V2 / 5IO（RK3588 / RK3588S）
+* **验证状态**：鲁班猫 3、鲁班猫 4、鲁班猫 5 已上机验证（HDMI 出图、调试串口 root shell、首次开机自动扩容）；3IO / 5-V2 / 5IO 已通过构建期产物校验，待上机测试
 * **内置能力**：`build-board.sh` 选板构建、`mk-rockchip-update.sh` 打包 eMMC 用的 update.img（RKDevTool/upgrade_tool 直刷，**不依赖野火 SDK**）、`setup-cn-network.sh` 国内网络一键配置、串口（`/dev/ttyFIQ0`）开箱即用 root shell
+* **DDR 频点**：RK3588 全系 1848MHz、RK3576 1560MHz（构建时自动选 rkbin 的 DDR blob，`DDR_FREQ=<MHz>` 可覆盖）
 
 ### 快速开始
 
@@ -32,25 +33,31 @@ sudo apt-get install make gcc g++ sed gawk wget patch pkg-config bison flex \
 # （或用构建系统自查：  ./scripts/checkdeps）
 
 # 2. 克隆本分支
-git clone -b rk3588-port https://github.com/raidenkl/Lakka-LibreELEC.git
+git clone -b lubancat https://github.com/raidenkl/Lakka-LibreELEC.git
 cd Lakka-LibreELEC
 
 # 3. 选板构建，产物在 target/（SD 卡直写；eMMC 见下）
 ./projects/Rockchip/tools/build-board.sh                        # 菜单选板
-# ./projects/Rockchip/tools/build-board.sh RK3588 lubancat-5    # 直接指定
+# ./projects/Rockchip/tools/build-board.sh RK3588 lubancat-5    # 直接指定（RK3588）
+# ./projects/Rockchip/tools/build-board.sh RK3576 lubancat-3    # 直接指定（RK3576）
 
 # 国内网络不稳时，先执行一次（用户级配置，可 -u 撤销）
 ./projects/Rockchip/tools/setup-cn-network.sh
 ```
 
-**刷写**：`target/*.img.gz` 解压后用 balenaEtcher/Rufus(DD 模式) 写 SD 卡；eMMC 用
-RKDevTool（MaskROM + 「下载镜像」）或先 `./projects/Rockchip/devices/RK3588/tools/mk-rockchip-update.sh`
-打包成 update.img 再刷。
+**刷写**：`target/*.img.gz` 解压后用 balenaEtcher/Rufus(DD 模式) 写 SD 卡；eMMC 用 RKDevTool
+（「升级固件」）或先跑 `./projects/Rockchip/devices/<CHIP>/tools/mk-rockchip-update.sh --board <板卡>`
+打包成 update.img 再刷（`build-board.sh` 成功后会直接打印对应命令）。
+
+> 刷完请**彻底断电 10 秒再上电**：RKDevTool 的「重启设备」不是真正断电，个别情况下首次启动会卡在
+> eMMC 初始化（HDMI/串口都没输出），断电重启即恢复。
 
 **详细文档**（逐板构建与刷写指南、串口调试、update.img 打包、相对厂商默认配置的全部改动说明，均为中文）：
 [`projects/Rockchip/devices/RK3588/README.md`](projects/Rockchip/devices/RK3588/README.md)
 与
-[`projects/Rockchip/devices/RK3588/BUILD_GUIDE.md`](projects/Rockchip/devices/RK3588/BUILD_GUIDE.md)。
+[`projects/Rockchip/devices/RK3588/BUILD_GUIDE.md`](projects/Rockchip/devices/RK3588/BUILD_GUIDE.md)；
+RK3576 见
+[`projects/Rockchip/devices/RK3576/README.md`](projects/Rockchip/devices/RK3576/README.md)。
 
 ## Support
 
