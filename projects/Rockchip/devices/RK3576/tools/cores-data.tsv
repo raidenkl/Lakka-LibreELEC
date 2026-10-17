@@ -1,0 +1,175 @@
+# core	category	recommend	note
+2048	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	2048 益智游戏
+81	7. 老式电脑	remove	极老（1981）
+a5200	4. 雅达利系	remove	极老（1982）
+amiarcadia	5. 其他家用机 / 街机	remove	极冷门；本包刚做过源修复
+amiberry	7. 老式电脑	keep	重复实现
+anarch	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	极简 FPS
+applewin	7. 老式电脑	remove	老（1977）
+ardens	6. 掌机（非任/世嘉）	remove	小众
+atari800	4. 雅达利系	remove	极老
+azahar	1. 任天堂系	remove-heavy	**大件**
+b2	7. 老式电脑	remove	老（1981）
+beetle_bsnes	1. 任天堂系	keep	SNES（Mednafen bSNES）
+beetle_lynx	4. 雅达利系	remove	Atari Lynx（Mednafen）
+beetle_ngp	6. 掌机（非任/世嘉）	keep	建议保留
+beetle_pce	5. 其他家用机 / 街机	keep	建议保留
+beetle_pce_fast	5. 其他家用机 / 街机	keep	PC Engine（快版）
+beetle_pcfx	5. 其他家用机 / 街机	keep	极冷门
+beetle_psx	3. 索尼系	keep	建议保留
+beetle_saturn	2. 世嘉系	keep	建议保留
+beetle_supafaust	1. 任天堂系	keep	SNES（面向 ARM 多核优化）
+beetle_supergrafx	5. 其他家用机 / 街机	keep	SuperGrafx
+beetle_vb	1. 任天堂系	remove	极冷门
+beetle_wswan	6. 掌机（非任/世嘉）	keep	Bandai WonderSwan
+blastem	2. 世嘉系	keep	MD/Genesis（fast & accurate）
+bluemsx	7. 老式电脑	remove	MSX / MSX2
+bnes	1. 任天堂系	keep	与上三条重复实现
+boom3	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove-heavy	大件
+boytacean	1. 任天堂系	remove	Rust 核心：会拉入 llvm:host（LLVM 源码 130 MB，国内下载基本必失败），默认建议排除
+bsnes	1. 任天堂系	keep	SNES（bsnes，精确）
+bsnes2014	1. 任天堂系	keep	SNES（bsnes 2014 分支）
+bsnes_hd	1. 任天堂系	keep	SNES（bsnes + HD 视频特性）
+bsnes_jg	1. 任天堂系	keep	SNES（cycle-accurate）
+bsnes_mercury	1. 任天堂系	keep	SNES（恢复 HLE DSP）
+cannonball	5. 其他家用机 / 街机	remove	OutRun 街机（引擎重制）
+cap32	7. 老式电脑	remove	老（1984）
+chailove	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	ChaiLove 2D 游戏框架
+citra	1. 任天堂系	remove-heavy	**大件**
+clownmdemu	2. 世嘉系	remove	冷门
+craft	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	Minecraft 克隆（C + 现代 OpenGL）
+crocods	7. 老式电脑	remove	重复实现
+daphne	5. 其他家用机 / 街机	keep	激光影碟游戏（含大量 ROM 依赖）
+desmume	1. 任天堂系	keep	NDS
+desmume_2015	1. 任天堂系	keep	NDS（2015 版分支）
+dice	5. 其他家用机 / 街机	remove	极冷门
+dinothawr	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	自带
+dirksimple	5. 其他家用机 / 街机	remove	冷门
+dolphin	1. 任天堂系	remove-heavy	**大件，编译很慢**
+dosbox	7. 老式电脑	keep	DOS（libretro 包装）
+dosbox_core	7. 老式电脑	keep	重复实现
+dosbox_pure	7. 老式电脑	keep	建议保留
+dosbox_svn	7. 老式电脑	keep	重复实现
+doublecherrygb	1. 任天堂系	keep	GB（最多 16 人 + 宝可梦配信）
+doukutsu_rs	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	Rust 核心：会拉入 llvm:host（LLVM 源码 130 MB，国内下载基本必失败），默认建议排除
+easyrpg	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	RPG Maker 2000/2003 游戏
+ecwolf	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	（官方描述为空）
+emux_sms	2. 世嘉系	remove	多机种（Emux）
+ep128emu	7. 老式电脑	remove	极冷门（匈牙利）
+fake_08	9. 幻想主机 / 可编程平台 / 玩具	remove	重复实现
+fbalpha2012	5. 其他家用机 / 街机	keep	街机（FinalBurn Alpha 2012）
+fbneo	5. 其他家用机 / 街机	keep	建议保留
+fceumm	1. 任天堂系	keep	NES / Famicom（FCEUmm）
+flycast	2. 世嘉系	keep	建议保留
+fmsx	7. 老式电脑	remove	重复实现
+freechaf	5. 其他家用机 / 街机	remove	极老（1976）
+freeintv	5. 其他家用机 / 街机	remove	极老（1979）
+fuse_libretro	7. 老式电脑	remove	老（1982）
+gam4980	7. 老式电脑	remove	玩具
+gambatte	1. 任天堂系	keep	建议保留
+gearboy	1. 任天堂系	keep	GB / GBC
+gearcoleco	5. 其他家用机 / 街机	remove	老（1982）
+geargrafx	5. 其他家用机 / 街机	keep	PCE / TG-16 / SuperGrafx / CD-ROM²
+gearlynx	4. 雅达利系	remove	Atari Lynx（含调试器）
+gearsystem	2. 世嘉系	keep	SMS / Game Gear / SG-1000
+genesis_plus_gx	2. 世嘉系	keep	建议保留
+genesis_plus_gx_wide	2. 世嘉系	keep	同上（宽屏版）
+geolith	5. 其他家用机 / 街机	keep	Neo Geo AES / MVS（高精度）
+gme	9. 幻想主机 / 可编程平台 / 玩具	remove	游戏音乐播放（Game_Music_Emu）
+gpsp	1. 任天堂系	keep	GBA（gpSP，快）
+gw_libretro	6. 掌机（非任/世嘉）	remove	极老（1980）
+handy	4. 雅达利系	remove	极冷门
+hatari	4. 雅达利系	keep	Atari ST / STE / TT / Falcon（电脑）
+higan_sfc	1. 任天堂系	keep	SNES（higan 多机种）
+higan_sfc_balanced	1. 任天堂系	keep	SNES（higan 平衡分支）
+jaxe	9. 幻想主机 / 可编程平台 / 玩具	remove	CHIP-8 / S-CHIP / XO-CHIP
+jollycv	5. 其他家用机 / 街机	remove	冷门
+jumpnbump	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	Jump 'n Bump
+kronos	9. 幻想主机 / 可编程平台 / 玩具	managed	OPENGLES_SUPPORT=yes 时由构建系统自动追加排除，GUI 不管理
+lowres_nx	9. 幻想主机 / 可编程平台 / 玩具	remove	LowRes NX（BASIC 可编程）
+lr_moonlight	9. 幻想主机 / 可编程平台 / 玩具	managed	Rockchip 项目由构建系统自动追加排除，GUI 不管理
+lrps2	3. 索尼系	remove-heavy	**大件、可能要 BIOS**
+lutro	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	Lua 游戏框架
+m2000	7. 老式电脑	remove	极冷门
+mame	5. 其他家用机 / 街机	remove-heavy	**大件，编译极慢**
+mame2000	5. 其他家用机 / 街机	keep	街机（MAME 0.37b5，极老 ROM 集）
+mame2003_plus	5. 其他家用机 / 街机	keep	建议保留（中等）
+mame2010	5. 其他家用机 / 街机	remove-heavy	**大件**
+mame2015	5. 其他家用机 / 街机	remove-heavy	**大件**
+melonds	1. 任天堂系	keep	建议保留
+melondsds	1. 任天堂系	keep	NDS（melonDS 重制）
+meowpc98	7. 老式电脑	remove	重复实现
+mesen	1. 任天堂系	keep	NES / Famicom（Mesen，高精度）
+mesen_s	1. 任天堂系	keep	SNES（Mesen-S）
+mgba	1. 任天堂系	keep	建议保留
+mgba_fork	1. 任天堂系	keep	GBA（mGBA 分支）
+mojozork	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	Z-Machine 文字冒险解释器
+mrboom	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	炸弹人克隆（最多 8 人）
+mu	6. 掌机（非任/世嘉）	remove	冷门
+mupen64plus_next	1. 任天堂系	keep	建议保留
+neocd	5. 其他家用机 / 街机	keep	Neo Geo CD
+nestopia	1. 任天堂系	keep	NES / Famicom（NEStopia）
+noods	1. 任天堂系	keep	NDS（NooDS）
+np2kai	7. 老式电脑	remove	冷门（日本）
+numero	9. 幻想主机 / 可编程平台 / 玩具	remove	TI-83 图形计算器
+nxengine	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	重复实现
+o2em	5. 其他家用机 / 街机	remove	极老（1978）
+openlara	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	古墓丽影（引擎重制）
+opera	5. 其他家用机 / 街机	keep	3DO
+panda3ds	1. 任天堂系	remove-heavy	**大件**
+parallel_n64	1. 任天堂系	keep	N64（重写优化版）
+pcsx_rearmed	3. 索尼系	keep	建议保留
+pd777	5. 其他家用机 / 街机	remove	极冷门
+picodrive	2. 世嘉系	keep	MD/Genesis/SMS/GG/Sega CD/32X
+play	3. 索尼系	remove-heavy	**大件**
+pocketcdg	9. 幻想主机 / 可编程平台 / 玩具	remove	CD+G 卡拉OK 播放器
+pokemini	1. 任天堂系	remove	极冷门（无彩色）
+potator	6. 掌机（非任/世嘉）	remove	极冷门
+ppsspp	3. 索尼系	remove-heavy	**大件**
+prboom	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	建议保留
+prosystem	4. 雅达利系	remove	极老（1986）
+puae	7. 老式电脑	keep	建议保留
+puae2021	7. 老式电脑	keep	重复实现
+px68k	7. 老式电脑	remove	极冷门（日本）
+pzretro	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	PuzzleScript 游戏
+quasi88	7. 老式电脑	remove	极冷门（日本）
+quicknes	1. 任天堂系	keep	与上两条重复实现
+race	6. 掌机（非任/世嘉）	keep	Neo Geo Pocket / Color
+reminiscence	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	Flashback
+retro8	9. 幻想主机 / 可编程平台 / 玩具	remove	PICO-8 实现
+rustation_ng	3. 索尼系	remove	Rust 核心：会拉入 llvm:host（LLVM 源码 130 MB，国内下载基本必失败），默认建议排除
+same_cdi	5. 其他家用机 / 街机	keep	冷门
+sameboy	1. 任天堂系	keep	GB / GBC（高精度）
+sameduck	6. 掌机（非任/世嘉）	remove	极冷门
+scummvm	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	**大件，建议保留**
+skyemu	1. 任天堂系	keep	GBA / GB / GBC / NDS（多合一）
+snes9x	1. 任天堂系	keep	建议保留
+snes9x2002	1. 任天堂系	keep	SNES（2002 版，最轻）
+snes9x2005	1. 任天堂系	keep	SNES（2005 版，ARM 优化）
+snes9x2005_plus	1. 任天堂系	keep	SNES（2005 版 + BLARGG APU）
+snes9x2010	1. 任天堂系	keep	SNES（2010 版，快）
+stella	4. 雅达利系	remove	极老（1977）
+stella2014	4. 雅达利系	remove	与上重复
+superbroswar	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	Super Bros War（对战）
+swanstation	3. 索尼系	keep	PS1（DuckStation）
+tamalibretro	6. 掌机（非任/世嘉）	remove	玩具
+tgbdual	1. 任天堂系	keep	GB / GBC（支持联机）
+theodore	7. 老式电脑	remove	极冷门（法国）
+thepowdertoy	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	The Powder Toy（物理沙盒）
+tic80	9. 幻想主机 / 可编程平台 / 玩具	remove	TIC-80 幻想主机
+tyrquake	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	Quake 1
+uae4arm	7. 老式电脑	keep	重复实现
+uzem	9. 幻想主机 / 可编程平台 / 玩具	remove	Uzebox（ATMega644 开源主机）
+vbam	1. 任天堂系	keep	GBA（VBA-M）
+vecx	5. 其他家用机 / 街机	remove	极老（1982）
+vice	7. 老式电脑	keep	建议保留
+vircon32	9. 幻想主机 / 可编程平台 / 玩具	remove	Vircon32 虚拟主机
+virtualjaguar	4. 雅达利系	remove	冷门
+virtualxt	7. 老式电脑	keep	IBM PC/XT
+vitaquake2	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	Quake II
+vitaquake3	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	keep	Quake III
+wasm4	9. 幻想主机 / 可编程平台 / 玩具	remove	WASM-4（WebAssembly 幻想主机）
+xmil	7. 老式电脑	remove	极冷门（日本）
+xrick	8. 游戏引擎 / 自研游戏（不是模拟器，按需取舍）	remove	Rick Dangerous
+yabasanshiro	2. 世嘉系	keep	Sega Saturn（YabaSanshiro）
+yabause	2. 世嘉系	keep	Sega Saturn（老实现）

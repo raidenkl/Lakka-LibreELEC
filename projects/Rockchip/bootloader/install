@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
-# RK3588: the LubanCat vendor U-Boot build (make.sh/fit.sh) already produced the
+# RK3588/RK3576: the LubanCat vendor U-Boot build (make.sh/fit.sh) already produced the
 # Rockchip SPL loader and uboot.img (FIT with U-Boot + BL31/BL32 from rkbin), so
 # only the bootloader container has to be laid out.  The offsets below are
 # container-internal; the container itself is written to the disk at 32 KiB
@@ -10,7 +10,8 @@
 #   container 16320  -> disk 8 MiB  (LBA 16384)  : uboot.img (FIT: u-boot + bl31/bl32)
 # 16320 * 512 = 8 MiB - 32 KiB.  Matches the LubanCat SDK parameter-extboot.txt
 # entry uboot@0x4000 and the Rockchip LBA 64 idblock rule.
-if [ "${DEVICE}" = "RK3588" ]; then
+case "${DEVICE}" in
+  RK3588|RK3576)
   PKG_LOADER="$(ls -1 *loader*.bin 2>/dev/null | head -1)"
 
   if [ -z "${PKG_LOADER}" ]; then
@@ -30,7 +31,7 @@ if [ "${DEVICE}" = "RK3588" ]; then
   cp -av "${PKG_LOADER}" uboot.img u-boot.cfg "${INSTALL}"/usr/share/bootloader 2>/dev/null
 
   return 0
-fi
+esac
 
 PKG_RKBIN="$(get_build_dir rkbin)"
 PKG_SOC="${DEVICE/RK/rk}"

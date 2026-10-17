@@ -1,0 +1,97 @@
+#!/bin/bash
+# wget wrapper for hosts where github.com is unreachable (typical in mainland China).
+#
+# Installed as ~/bin/wget so that the LibreELEC build system picks it up before
+# the real /usr/bin/wget.  Two independent fallbacks:
+#
+#   1) GitHub URLs (github.com / codeload.github.com / raw.githubusercontent.com /
+#      objects.githubusercontent.com) are retried through a mirror prefix such as
+#      https://gh-proxy.com/<original-url>.  Needed because GitHub enforces HSTS,
+#      so the usual https->http downgrade cannot work there.
+#   2.0) All other hosts are tried directly first; if that fails, the same URL is
+#      retried over plain HTTP (fixes hosts whose TLS is blocked but HTTP is fine,
+#      e.g. www.kernel.org).
+#
+# Integrity is never weakened: LibreELEC verifies every download against
+# PKG_SHA256 afterwards, so a mirror can only make the transfer fail, not
+# silently corrupt a package.
+#
+# Override the mirror list with WGET_MIRRORS="https://a https://b".
+# Triggered rewrites are logged to /tmp/wget-gh-mirror.log
+
+REAL_WGET="${REAL_WGET:-/usr/bin/wget}"
+LOG="${WGET_MIRROR_LOG:-/tmp/wget-gh-mirror.log}"
+MIRRORS="${WGET_MIRRORS:-https://gh-proxy.com https://ghfast.top}"
+
+GH_HOSTS="github.com codeload.github.com raw.githubusercontent.com objects.githubusercontent.com gist.githubusercontent.com"
+
+args=("$@")
+
+# locate the first http(s) URL in the argument list
+idx=-1
+for i in "${!args[@]}"; do
+  case "${args[$i]}" in
+    http://*|https://*) idx=$i; break ;;
+  esac
+done
+if [ "$idx" -lt 0 ]; then
+  exec "$REAL_WGET" "$@"
+fi
+url="${args[$idx]}"
+host="$(printf '%s' "$url" | sed 's|^[a-z]*://||; s|/.*||')"
+
+# figure out -O target (so a failed attempt can be discarded before retrying)
+outfile=""
+for i in "${!args[@]}"; do
+  case "${args[$i]}" in
+    -O|--output-document)
+      outfile="${args[$((i+1))]}" ;;
+  esac
+done
+
+log() { printf '%s  %s  %s\n' "$(date '+%F %T')" "$1" "$2" >>"$LOG" 2>/dev/null; }
+
+# args without -c/--continue (used for retries that must start from scratch)
+args_nocont=()
+for a in "${args[@]}"; do
+  case "$a" in
+    -c|--continue) ;;
+    *) args_nocont+=("$a") ;;
+  esac
+done
+
+attempt() { # $1 = url, $2 = "" | "nocont"
+  local u="$1" a=()
+  if [ "$2" = "nocont" ]; then a=("${args_nocont[@]}"); else a=("${args[@]}"); fi
+  a[$idx]="$u"
+  "$REAL_WGET" "${a[@]}"
+}
+
+is_gh=0
+for h in $GH_HOSTS; do [ "$host" = "$h" ] && is_gh=1 && break; done
+
+if [ "$is_gh" = 1 ]; then
+  for m in $MIRRORS; do
+    log "MIRROR" "$m/$url"
+    [ -n "$outfile" ] && rm -f "$outfile"
+    attempt "$m/$url" nocont && exit 0
+  done
+  # last resort: try the original URL (network may have recovered)
+  log "DIRECT" "$url"
+  [ -n "$outfile" ] && rm -f "$outfile"
+  attempt "$url" nocont && exit 0
+  echo "wget-gh-mirror: all attempts failed for $url" >&2
+  exit 1
+fi
+
+# non-GitHub host: direct first, then https->http
+attempt "$url" "" && exit 0
+case "$url" in
+  https://*)
+    http_url="${url/https:/http:}"
+    log "HTTP-FALLBACK" "$http_url"
+    attempt "$http_url" nocont && exit 0
+    ;;
+esac
+echo "wget-gh-mirror: all attempts failed for $url" >&2
+exit 1

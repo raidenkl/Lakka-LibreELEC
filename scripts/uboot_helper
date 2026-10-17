@@ -441,6 +441,18 @@ devices = \
         'rockchip_legacy_boot': '1'
       },
     },
+    'RK3576': {
+      'lubancat-3': {
+        'dtb': 'rk3576-lubancat-3.dtb',
+        'config': 'lubancat-rk3576-msata_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-3io': {
+        'dtb': 'rk3576-lubancat-3io.dtb',
+        'config': 'lubancat-rk3576-msata_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+    },
   },
   'Samsung': {
     'Exynos': {

@@ -89,6 +89,8 @@ expected_model() {
     lubancat-5-v2) echo "Embedfire LubanCat-5 V2" ;;
     lubancat-5io)  echo "Embedfire LubanCat-5IOB" ;;
     lubancat-5iob) echo "Embedfire LubanCat-5IOB" ;;
+    lubancat-3)    echo "EmbedFire LubanCat-3" ;;
+    lubancat-3io)  echo "EmbedFire LubanCat-3IO" ;;
     lubancat-4)    echo "Embedfire LubanCat-4" ;;
     lubancat-4-v1) echo "Embedfire LubanCat-4 V1" ;;
     *)             echo "" ;;
@@ -292,26 +294,31 @@ echo "$CONF" | sed 's/^/  /'
 echo "$CONF" | grep -q "FDT /${DTB}$" || { warn "extlinux.conf 的 FDT 不是 /${DTB}"; FAIL=1; }
 echo "$CONF" | grep -q 'LINUX /KERNEL'  || { warn "extlinux.conf 没有 LINUX /KERNEL"; FAIL=1; }
 
-# 4) dtb 内容：model + HDMI 通路
+# 4) dtb 内容：model + HDMI 通路（HDMI 节点名按芯片区分：RK3576 无 "0" 后缀）
+CHIP_FROM_IMG="$(basename "$IMG" | cut -d- -f2 | cut -d. -f1)"   # Lakka-RK3576.aarch64-... -> RK3576
+case "$CHIP_FROM_IMG" in
+  RK3576) HDMI_NODE="hdmi@27da0000"; HDMI_ROUTE="route-hdmi";  HDMI_SND="rockchip-hdmi"  ;;
+  *)      HDMI_NODE="hdmi@fde80000"; HDMI_ROUTE="route-hdmi0"; HDMI_SND="rockchip-hdmi0" ;;
+esac
 if mcopy -o -i "$WORK/img@@16777216" "::/${DTB}" "$WORK/chk.dtb" 2>/dev/null && [ -s "$WORK/chk.dtb" ]; then
   dtc -I dtb -O dts -o "$WORK/chk.dts" "$WORK/chk.dtb" 2>/dev/null
   MODEL="$(grep -m1 -o 'model = "[^"]*"' "$WORK/chk.dts" | sed 's/model = "//; s/"$//')"
-  HDST="$(grep -A30 -m1 'hdmi@fde80000 {' "$WORK/chk.dts" | grep -m1 -o 'status = "[^"]*"' | cut -d'"' -f2)"
-  RTST="$(grep -A8 -m1 'route-hdmi0 {' "$WORK/chk.dts" | grep -m1 -o 'status = "[^"]*"' | cut -d'"' -f2)"
-  SND="$(grep -c 'rockchip-hdmi0' "$WORK/chk.dts")"
+  HDST="$(grep -A30 -m1 "$HDMI_NODE {" "$WORK/chk.dts" | grep -m1 -o 'status = "[^"]*"' | cut -d'"' -f2)"
+  RTST="$(grep -A8 -m1 "$HDMI_ROUTE {" "$WORK/chk.dts" | grep -m1 -o 'status = "[^"]*"' | cut -d'"' -f2)"
+  SND="$(grep -c "$HDMI_SND" "$WORK/chk.dts")"
   printf '  dtb model     : %s\n' "$MODEL"
-  printf '  hdmi@fde80000 : %s\n' "${HDST:-?}"
-  printf '  route-hdmi0   : %s\n' "${RTST:-?}"
-  printf '  rockchip-hdmi0: %s\n' "$SND"
+  printf '  %s : %s\n' "$HDMI_NODE" "${HDST:-?}"
+  printf '  %s : %s\n' "$HDMI_ROUTE" "${RTST:-?}"
+  printf '  %s: %s\n' "$HDMI_SND" "$SND"
   WANT="$(expected_model "$BOARD")"
   if [ -n "$WANT" ]; then
     [ "$MODEL" = "$WANT" ] || { warn "dtb model 期望 '$WANT'，实际 '$MODEL'"; FAIL=1; }
   else
     warn "uboot_helper 里这个板卡没在 expected_model() 表里，跳过 model 断言"
   fi
-  [ "$HDST" = "okay" ] || { warn "hdmi@fde80000 不是 okay（显示补丁没生效？）"; FAIL=1; }
-  [ "$RTST" = "okay" ] || { warn "route-hdmi0 不是 okay"; FAIL=1; }
-  [ "$SND" -ge 1 ]     || { warn "找不到 rockchip-hdmi0 声卡节点"; FAIL=1; }
+  [ "$HDST" = "okay" ] || { warn "$HDMI_NODE 不是 okay（显示配置没生效？）"; FAIL=1; }
+  [ "$RTST" = "okay" ] || { warn "$HDMI_ROUTE 不是 okay"; FAIL=1; }
+  [ "$SND" -ge 1 ]     || { warn "找不到 $HDMI_SND 声卡节点"; FAIL=1; }
 else
   warn "无法从 boot 分区取出 $DTB"
   FAIL=1
@@ -327,7 +334,7 @@ if [ "$FAIL" = "0" ]; then
   echo "  # 刷机（SD 直写）"
   echo "  gzip -dc $IMG | dd of=/dev/sdX bs=4M status=progress conv=fsync"
   echo "  # 或打成 RKDevTool 用的 update.img"
-  echo "  ./projects/Rockchip/devices/RK3588/tools/mk-rockchip-update.sh --board $BOARD"
+  echo "  ./projects/Rockchip/devices/$CHIP_FROM_IMG/tools/mk-rockchip-update.sh --board $BOARD"
   echo "  # 上机后先看串口（1500000 8N1）里 DDR 那行，确认内存频率与 DDR blob 匹配"
   exit 0
 else
