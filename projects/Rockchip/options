@@ -76,5 +76,11 @@
   # build and install driver addons (yes / no)
     DRIVER_ADDONS_SUPPORT="no"
 
+  # enable sshd by default (Dropbear/OpenSSH switch is honoured by
+  # packages/network/openssh/package.mk: it deletes the Condition* guards from
+  # sshd.service, and the unit is already enabled via enable_service).
+  # 改这个开关后必须重新 install openssh 才生效：./scripts/clean openssh
+    SSH_ENABLED_DEFAULT="yes"
+
   # debug tty path
     DEBUG_TTY="/dev/ttyS2"
