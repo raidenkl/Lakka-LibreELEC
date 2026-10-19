@@ -20,6 +20,7 @@
 #   -p, --project <P>   默认 Rockchip
 #   -j, --jobs <N>      默认 nproc
 #   --no-clean          不清理 u-boot 构建树（默认清理，见下）
+#   --no-update         不打包 update.img（默认在构建成功后自动打包）
 #   --force             磁盘不足也继续
 #   -y, --yes           菜单模式下不再交互确认
 #   -h, --help
@@ -41,6 +42,7 @@ THREADCOUNT="${THREADCOUNT:-$(nproc 2>/dev/null || echo 4)}"
 CLEAN_UBOOT=yes
 FORCE=no
 ASSUME_YES=no
+PACK_UPDATE=yes
 
 CHIP=""
 BOARD=""
@@ -93,6 +95,14 @@ expected_model() {
     lubancat-3io)  echo "EmbedFire LubanCat-3IO" ;;
     lubancat-4)    echo "Embedfire LubanCat-4" ;;
     lubancat-4-v1) echo "Embedfire LubanCat-4 V1" ;;
+    lubancat-0)    echo "EmbedFire LubanCat-Zero" ;;
+    lubancat-1)    echo "EmbedFire LubanCat-1" ;;
+    lubancat-1n)   echo "EmbedFire LubanCat-1N" ;;
+    lubancat-2)    echo "EmbedFire LubanCat-2" ;;
+    lubancat-2-v1) echo "EmbedFire LubanCat-2" ;;
+    lubancat-2-v2) echo "EmbedFire LubanCat-2" ;;
+    lubancat-2-v3) echo "EmbedFire LubanCat-2" ;;
+    lubancat-2n)   echo "EmbedFire LubanCat-2N" ;;
     *)             echo "" ;;
   esac
 }
@@ -103,6 +113,7 @@ while [ $# -gt 0 ]; do
     -p|--project)   PROJECT="$2"; shift 2 ;;
     -j|--jobs)      THREADCOUNT="$2"; shift 2 ;;
     --no-clean)     CLEAN_UBOOT=no; shift ;;
+    --no-update)    PACK_UPDATE=no; shift ;;
     --force)        FORCE=yes; shift ;;
     -y|--yes)       ASSUME_YES=yes; shift ;;
     -h|--help)      usage; exit 0 ;;
@@ -294,10 +305,11 @@ echo "$CONF" | sed 's/^/  /'
 echo "$CONF" | grep -q "FDT /${DTB}$" || { warn "extlinux.conf 的 FDT 不是 /${DTB}"; FAIL=1; }
 echo "$CONF" | grep -q 'LINUX /KERNEL'  || { warn "extlinux.conf 没有 LINUX /KERNEL"; FAIL=1; }
 
-# 4) dtb 内容：model + HDMI 通路（HDMI 节点名按芯片区分：RK3576 无 "0" 后缀）
+# 4) dtb 内容：model + HDMI 通路（RK3588 用 route-hdmi0 / hdmi@fde80000，RK3576 与 RK356x 无 "0" 后缀）
 CHIP_FROM_IMG="$(basename "$IMG" | cut -d- -f2 | cut -d. -f1)"   # Lakka-RK3576.aarch64-... -> RK3576
 case "$CHIP_FROM_IMG" in
   RK3576) HDMI_NODE="hdmi@27da0000"; HDMI_ROUTE="route-hdmi";  HDMI_SND="rockchip-hdmi"  ;;
+  RK3566|RK3568) HDMI_NODE="hdmi@fe0a0000"; HDMI_ROUTE="route-hdmi"; HDMI_SND="hdmi-sound" ;;
   *)      HDMI_NODE="hdmi@fde80000"; HDMI_ROUTE="route-hdmi0"; HDMI_SND="rockchip-hdmi0" ;;
 esac
 if mcopy -o -i "$WORK/img@@16777216" "::/${DTB}" "$WORK/chk.dtb" 2>/dev/null && [ -s "$WORK/chk.dtb" ]; then
@@ -330,11 +342,31 @@ echo
 if [ "$FAIL" = "0" ]; then
   info "全部校验通过：$IMG"
   echo
+  # 构建系统只会产出原始磁盘镜像；Rockchip 官方工具（SD_Firmware_Tool 写 SD、
+  # RKDevTool 写 eMMC）吃的是 RKFW 的 update.img，所以这里默认直接打好。
+  # 实测：直接 dd/gunzip 写 SD 卡容易写坏（.gz 未解压、工具只认原始 img），
+  # 官方工具 + update.img 是验证过的路径，因此作为默认交付物。
+  if [ "$PACK_UPDATE" = "yes" ]; then
+    PACKER="./projects/Rockchip/devices/${CHIP_FROM_IMG}/tools/mk-rockchip-update.sh"
+    if [ -x "$PACKER" ]; then
+      echo
+      info "打包 update.img（SD 用 Rockchip SD_Firmware_Tool，eMMC 用 RKDevTool）"
+      if "$PACKER" --board "$BOARD" 2>&1 | tee -a "$LOG" | sed -n '/firmware *:/,$p' | sed 's/^/  /'; then
+        :
+      else
+        warn "update.img 打包失败（详见 $LOG）；原始镜像 $IMG 仍然可用"
+      fi
+    else
+      warn "找不到 $PACKER，跳过 update.img 打包"
+    fi
+  fi
+
+  echo
   echo "下一步:"
-  echo "  # 刷机（SD 直写）"
+  echo "  # SD 卡：Rockchip SD_Firmware_Tool 选「SD启动」→ 选刚打好的 update.img"
+  echo "  # eMMC ：RKDevTool「升级固件」→ 选同一个 update.img"
+  echo "  # 原始镜像（仅在需要 dd 到整盘时用，务必先解压；.gz 直接写 = 无效卡）"
   echo "  gzip -dc $IMG | dd of=/dev/sdX bs=4M status=progress conv=fsync"
-  echo "  # 或打成 RKDevTool 用的 update.img"
-  echo "  ./projects/Rockchip/devices/$CHIP_FROM_IMG/tools/mk-rockchip-update.sh --board $BOARD"
   echo "  # 上机后先看串口（1500000 8N1）里 DDR 那行，确认内存频率与 DDR blob 匹配"
   exit 0
 else
