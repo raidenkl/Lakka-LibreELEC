@@ -100,7 +100,9 @@ done
 [ -n "$REPO" ] || die "cannot locate the LibreELEC/Lakka repository root above $SCRIPT_DIR"
 cd "$REPO"
 
-BUILD_DIR="$(ls -d build.Lakka-*.aarch64 2>/dev/null | head -1 || true)"
+# 多 build 目录并存时按 DEVICE 定位，否则会取到别的芯片的 loader/uboot.img
+BUILD_DIR="build.Lakka-${DEVICE}.aarch64"
+[ -d "${BUILD_DIR}" ] || BUILD_DIR="$(ls -d build.Lakka-*.aarch64 2>/dev/null | head -1 || true)"
 [ -n "$BUILD_DIR" ] || die "no build.Lakka-*.aarch64 directory - build the image first"
 
 IMG=""; LOADER=""; UBOOT=""; SDK_DIR=""   # --sdk overrides the vendored tools
