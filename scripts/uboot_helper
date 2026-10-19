@@ -441,6 +441,50 @@ devices = \
         'rockchip_legacy_boot': '1'
       },
     },
+    'RK3566': {
+      'lubancat-0': {
+        'dtb': 'rk3566-lubancat-0.dtb',
+        'config': 'lubancat-rk3566-msata_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-1': {
+        'dtb': 'rk3566-lubancat-1.dtb',
+        'config': 'lubancat-rk3566-msata_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-1n': {
+        'dtb': 'rk3566-lubancat-1n.dtb',
+        'config': 'lubancat-rk3566-msata_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+    },
+    'RK3568': {
+      'lubancat-2': {
+        'dtb': 'rk3568-lubancat-2.dtb',
+        'config': 'lubancat-rk3568-pcie_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-2-v1': {
+        'dtb': 'rk3568-lubancat-2-v1.dtb',
+        'config': 'lubancat-rk3568-pcie_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-2-v2': {
+        'dtb': 'rk3568-lubancat-2-v2.dtb',
+        'config': 'lubancat-rk3568-pcie_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-2-v3': {
+        'dtb': 'rk3568-lubancat-2-v3.dtb',
+        'config': 'lubancat-rk3568-pcie_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+      'lubancat-2n': {
+        'dtb': 'rk3568-lubancat-2n.dtb',
+        'config': 'lubancat-rk3568-pcie_defconfig',
+        'rockchip_legacy_boot': '1'
+      },
+    },
     'RK3576': {
       'lubancat-3': {
         'dtb': 'rk3576-lubancat-3.dtb',

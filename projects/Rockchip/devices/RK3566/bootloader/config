@@ -1,0 +1,27 @@
+# RK3566 / LubanCat 0 / 1 / 1N (野火鲁班猫 Zero / 1 / 1N) (Lakka)
+#
+# Minimal, build-verified set.  NOTE: do NOT add "# CONFIG_VIDEO is not set" or
+# "# CONFIG_DISPLAY is not set" here - the vendor tree force-selects the
+# Rockchip display drivers (drivers/video/drm/*) which reference the generic
+# DRM helpers; disabling VIDEO removes those helpers and u-boot fails to link.
+#
+# NOTE: no CONFIG_DEBUG_UART_* here on purpose.  The vendor lubancat-rk3566-msata_defconfig
+# already sets DEBUG_UART_BASE=0xFE660000 (rk356x UART2); neither the RK3588
+# fragment's 0xFEB50000 nor RK3576's 0x2ad40000 is valid here.
+
+# 5 s window on the debug UART so the U-Boot prompt can be reached
+CONFIG_BOOTDELAY=5
+
+# the SPL must load U-Boot from the raw 8 MiB offset (LBA 0x4000); our MBR
+# layout has no partition named "uboot", so never use the partition lookup
+# CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_PARTITION is not set
+CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR=y
+CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x4000
+
+# console baud rate on the debug UART (1500000 8N1)
+CONFIG_BAUDRATE=1500000
+
+# make the extlinux/distro boot path explicit
+CONFIG_CMD_SYSBOOT=y
+CONFIG_CMD_FAT=y
+CONFIG_CMD_FS_GENERIC=y
