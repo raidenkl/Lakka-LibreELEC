@@ -1,0 +1,24 @@
+From: raidenkl <1740512636@qq.com>
+Subject: [PATCH] soc: rockchip: pm_domains: do not panic on idle ack timeout
+
+--- a/drivers/soc/rockchip/pm_domains.c
++++ b/drivers/soc/rockchip/pm_domains.c
+@@ -633,7 +633,17 @@
+ 
+ 	return ret;
+ error:
+-	panic("panic_on_set_idle set ...\n");
++	/*
++	 * Vendor debug assert: a power-domain idle handshake timeout is not a
++	 * reason to kill the whole box.  Both failure paths above already
++	 * reported the offending domain through dev_err(), so keep the error
++	 * return and let the caller's probe fail instead of panicking.
++	 *
++	 * Hit on RK356x: the standalone iommu nodes (npu/vpu/rga/...) are
++	 * probed from rk_iommu_driver_init(), i.e. a core_initcall that runs
++	 * before the pmic/regulator drivers, and the NPU domain then fails to
++	 * leave idle -> "Kernel panic - not syncing: panic_on_set_idle set".
++	 */
+ 	return ret;
+ }
+ 

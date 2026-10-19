@@ -1,0 +1,28 @@
+From: raidenkl <1740512636@qq.com>
+Subject: [PATCH] arm64: dts: rockchip: rk3566: disable the NPU and its iommu
+
+--- a/arch/arm64/boot/dts/rockchip/rk3566-lubancat.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3566-lubancat.dtsi
+@@ -357,13 +357,20 @@
+ 	status = "okay";
+ };
+ 
++/*
++ * Lakka does not use the NPU.  Keep it (and its standalone iommu node) off:
++ * rknpu_mmu is probed from rk_iommu_driver_init() - a core_initcall that runs
++ * before the pmic/regulator drivers - and powering the NPU domain there fails
++ * the PMU idle handshake, which the vendor pm_domains driver used to turn into
++ * a kernel panic.
++ */
+ &rknpu {
+ 	rknpu-supply = <&vdd_npu>;
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &rknpu_mmu {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &rockchip_suspend {
