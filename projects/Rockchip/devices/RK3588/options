@@ -52,7 +52,7 @@
   # 串口调试 shell：vendor 内核把 UART2 交给 fiq_debugger（/dev/ttyFIQ0），而
   # LibreELEC 有意删掉了所有 getty 单元、镜像里也没有 agetty，所以自带一个
   # "直接在 tty 上起 root shell" 的单元（见 packages/rk-serial-console）。
-    ADDITIONAL_PACKAGES+=" rk-serial-console"
+    ADDITIONAL_PACKAGES+=" rk-serial-console rk-audio-default"
 
   # 只保留主流现代机种。排除：1970–80 年代老机种、冷门老电脑（PC-88/98、X1/X68000、
   # Thomson、Enterprise、P2000）、小众幻想主机与玩具、非模拟器类核心；另排除 3 个

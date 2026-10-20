@@ -1,0 +1,15 @@
+[Unit]
+Description=Enable the board audio output stage (RK809 / ES8388)
+Documentation=https://github.com/raidenkl/Lakka-LibreELEC
+After=sound.target
+Wants=sound.target
+ConditionPathExists=/proc/asound/cards
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/rk-audio-default
+TimeoutStartSec=30
+
+[Install]
+WantedBy=multi-user.target

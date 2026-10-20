@@ -1,0 +1,44 @@
+From: raidenkl <1740512636@qq.com>
+Subject: [PATCH] ASoC: rockchip: rk817: re-apply the playback path after power up
+
+"Playback Path" is only applied when its value changes, but the DAPM
+power-up sequence rewrites the output stage with the defaults from
+playback_power_up_list (class-D off, DACD down).  As a result only the
+very first PCM stream after selecting a path is audible; every later
+stream stays silent until userspace toggles the control away and back.
+
+Re-apply the currently selected path at the end of the playback
+power-up, passing it as pre_path so the helper does not recurse into
+the power-up it just finished.
+
+--- a/sound/soc/codecs/rk817_codec.c
++++ b/sound/soc/codecs/rk817_codec.c
+@@ -456,6 +456,9 @@
+ #define RK817_CODEC_CAPTURE_POWER_DOWN_LIST_LEN \
+ 	ARRAY_SIZE(capture_power_down_list)
+ 
++static int rk817_playback_path_config(struct snd_soc_component *component,
++				      long pre_path, long target_path);
++
+ static int rk817_codec_power_up(struct snd_soc_component *component, int type)
+ {
+ 	struct rk817_codec_priv *rk817 = snd_soc_component_get_drvdata(component);
+@@ -488,6 +491,18 @@
+ 			snd_soc_component_write(component, RK817_CODEC_APLL_CFG4, 0xa5);
+ 		}
+ 		rk817_restart_dac_digital_clk(component);
++
++		/*
++		 * The power-up list above restores the output-stage defaults
++		 * (class-D off, DACD down).  "Playback Path" is only applied
++		 * when its value changes, so without this the output stays
++		 * muted for every PCM stream opened after the first one.
++		 * Passing playback_path as pre_path skips the recursive
++		 * power-up inside rk817_playback_path_config().
++		 */
++		if (rk817->playback_path != OFF)
++			rk817_playback_path_config(component, rk817->playback_path,
++						   rk817->playback_path);
+ 	}
+ 
+ 	if (type & RK817_CODEC_CAPTURE) {

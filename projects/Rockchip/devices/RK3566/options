@@ -52,7 +52,7 @@
   # 串口调试 shell：vendor 内核把 UART2 交给 fiq_debugger（/dev/ttyFIQ0），而
   # LibreELEC 有意删掉了所有 getty 单元、镜像里也没有 agetty，所以自带一个
   # "直接在 tty 上起 root shell" 的单元（见 packages/rk-serial-console）。
-    ADDITIONAL_PACKAGES+=" rk-serial-console"
+    ADDITIONAL_PACKAGES+=" rk-serial-console rk-audio-default"
 
   # 与 RK3588/RK3576 相同的核心取舍清单（A55 性能有限，后续按上机情况再裁）。
   # 前缀保留 ${EXCLUDE_LIBRETRO_CORES}：允许命令行追加排除项做冒烟构建，

@@ -1,0 +1,54 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0
+#
+# Open the board audio output stage on every Rockchip LubanCat board.
+#
+#   * RK809/RK817 : "Playback Path" defaults to OFF; SPK_HP enables the
+#                   speaker and the headphone output at the same time.
+#   * ES8388      : OUT1/OUT2 analogue output stages default to off.
+#
+# Controls are addressed by name and every step is best-effort, so the same
+# image works on all boards (a missing control is silently ignored).
+
+set -u
+
+set_card() {
+	card="$1"
+	id="$2"
+	changed=0
+
+	# RK809 / RK817
+	if amixer -c "$card" sset 'Playback Path' SPK_HP >/dev/null 2>&1; then
+		changed=1
+	fi
+
+	# ES8388 / ES8323 (cset by name, they are not "simple" controls)
+	if amixer -c "$card" cset name='OUT1 Switch' 1 >/dev/null 2>&1; then
+		changed=1
+	fi
+	if amixer -c "$card" cset name='OUT2 Switch' 1 >/dev/null 2>&1; then
+		changed=1
+	fi
+
+	if [ "$changed" = "1" ]; then
+		echo "rk-audio-default: card$card ($id) output stage enabled"
+	else
+		echo "rk-audio-default: card$card ($id) no known output control, skipped"
+	fi
+}
+
+for dir in /proc/asound/card[0-9]*; do
+	[ -d "$dir" ] || continue
+	card="${dir##*/card}"
+	id="$(cat "$dir/id" 2>/dev/null)"
+	[ -n "${id:-}" ] || id=unknown
+
+	# HDMI / DP audio have nothing to initialise
+	case "$id" in
+	*hdmi*|*dp[0-9]*) continue ;;
+	esac
+
+	set_card "$card" "$id"
+done
+
+exit 0
