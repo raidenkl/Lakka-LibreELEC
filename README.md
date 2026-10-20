@@ -63,6 +63,97 @@ cd Lakka-LibreELEC
 > eMMC 初始化（HDMI/串口都没输出），断电重启即恢复。
 
 
+## 音频（喇叭 / 耳机）
+
+### 为什么刷完默认没有声音
+
+Rockchip 板卡的 codec 输出级默认是**关闭**的，而 Lakka/LibreELEC 的 udev `soundconfig`
+只处理 `Master` / `PCM` / `Speaker` / `Headphone` 这类通用控件，不认识下面两个厂商私有开关：
+
+| codec | 板卡 | 必须打开 | 默认值 |
+| --- | --- | --- | --- |
+| **RK809 / RK817** | 鲁班猫 0 / 1 / 1N（RK3566）、2 / 2-V1..V3 / 2N（RK3568） | `Playback Path` = `SPK` 或 `SPK_HP` | **OFF** |
+| **ES8388 / ES8323** | 鲁班猫 3 / 3IO（RK3576）、4 / 5 / 5-V2 / 5IO（RK3588） | `OUT1 Switch`、`OUT2 Switch` = on | **off** |
+
+另外 RetroArch 自己还有一层音量（`audio_volume`），它和 ALSA 是独立的两套开关，
+排查时不要混在一起判断。
+
+### 临时修复
+
+RK809 板（RK3566 / RK3568）：
+
+```sh
+amixer -c 0 sset 'Playback Path' SPK_HP   # 喇叭 + 耳机同时输出
+# 只开喇叭用 SPK，只开耳机用 HP
+```
+
+ES8388 板（RK3576 / RK3588）—— 这两个不是 *simple* 控件，`sset` 会报
+`Unable to find simple control`，必须用 `cset`：
+
+```sh
+amixer -c 0 cset name='OUT1 Switch' 1     # 喇叭 / 线路输出
+amixer -c 0 cset name='OUT2 Switch' 1     # 耳机
+# 等价的按编号写法：amixer -c 0 cset numid=80 1 / numid=81 1
+```
+
+然后播放测试（`retroarch` 会独占设备，先停掉）：
+
+```sh
+systemctl stop retroarch
+speaker-test -D plughw:0,0 -c 2 -t sine -l 2
+```
+
+> **RK809 的一个坑**：`Playback Path` 的驱动实现里，值没变化就直接返回、不写寄存器
+> （`rk817_playback_path_put()` 的同值短路）。而 DAPM 每次 PCM 上电都会把输出级写回
+> class-D off / DACD down，所以如果你设过一次 `SPK_HP` 之后又没声音了，**先设 `OFF`
+> 再设回去**即可重新上电：
+>
+> ```sh
+> amixer -c 0 sset 'Playback Path' OFF
+> amixer -c 0 sset 'Playback Path' SPK_HP
+> ```
+>
+> 本分支的镜像已经通过内核补丁从根本上修掉这个问题（见下）。
+
+### 永久生效（不改镜像）
+
+```sh
+mkdir -p /storage/.config
+alsactl store -f /storage/.config/sound.conf
+```
+
+`/storage/.config/sound.conf` 会被 udev 的 `90-alsa-restore.rules` 在每次声卡出现时
+`alsactl restore`，所以重启后仍然有效。
+
+RetroArch 音量单独改（改之前先 `systemctl stop retroarch`，否则退出时会被写回）：
+
+```sh
+sed -i 's/^audio_volume = .*/audio_volume = "1.000000"/' /storage/.config/retroarch/retroarch.cfg
+systemctl start retroarch
+```
+
+### 镜像内已内置的默认初始化
+
+本分支包含 `projects/Rockchip/packages/rk-audio-default/`：
+
+- `rk-audio-default.service`（oneshot，`After=sound.target`）在声卡注册后执行
+  `/usr/bin/rk-audio-default`；
+- 脚本遍历 `/proc/asound/card[0-9]*`，跳过 HDMI/DP 声卡，然后按 codec 名称设置：
+  RK809 → `Playback Path=SPK_HP`，ES8388 → `OUT1/OUT2 Switch=1`，
+  控件不存在时静默跳过，所以同一个镜像服务所有板卡；
+- 配套内核补丁 `rockchip-9006-audio-rk817-reapply-playback-path.patch`：
+  在 `rk817_codec_power_up()` 的 playback 分支末尾按当前 `playback_path`
+  重新应用一次，解决"只有第一次播放有声"。
+
+四个芯片的 `options` 都已把 `rk-audio-default` 加进 `ADDITIONAL_PACKAGES`，
+正常情况下**刷完即有声音**，不需要手动 `amixer`。
+
+### 硬件提醒
+
+RK809 内置 class-D 是按 **8Ω** 负载设计的。接 4Ω 3W 这类喇叭属于超规格，
+可能出现音量偏小、失真或触发过流保护（表现为断续/无声）。优先用 8Ω 2W 的喇叭；
+如果只能用低阻喇叭，建议把 `DAC Playback Volume` 控制在 200 左右（约 -10dB）以内。
+
 ## 游戏机核心（libretro cores）配置
 
 Lakka 的每个「游戏机」对应一个 libretro 核心（源码目录 `packages/lakka/libretro_cores/<核心名>/`），
@@ -137,6 +228,10 @@ EXCLUDE_LIBRETRO_CORES="mame mame2015 mame2010 ppsspp citra scummvm panda3ds fly
   会穿透到宿主机上的同名路径，结果不可信。
 - 想要**全部机种**：把该芯片 `options` 的 `EXCLUDE_LIBRETRO_CORES` 置成空串（`EXCLUDE_LIBRETRO_CORES=""`）即可；
   但 A53 / A72 这类平台跑全量核心意义不大，构建时间也会明显拉长。
+
+## 设备树配置
+
+Lakka的`/flash`目录存储着当前使用的设备树，而`/flash/extlinux/extlinux.conf`则配置了当前正在使用的设备树。要修改的话需要先执行`mount -o remount,rw /flash`令`/flash`分区可写。`/usr/share/bootloader`存放了编译好的设备树，他们不一定被使用。
 
 ## Support
 
